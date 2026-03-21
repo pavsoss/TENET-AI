@@ -1,4 +1,4 @@
-name: 🤖 TENET Agent – PR Review
+name: 🤖 TENET Agent - PR Review
 
 on:
   pull_request:
@@ -6,14 +6,18 @@ on:
 
 permissions:
   contents: read
+  issues: write
   pull-requests: write
 
 jobs:
   tenet-review:
     name: TENET Security Review
     runs-on: ubuntu-latest
-    # Skip bot-created PRs to avoid loops
-    if: github.actor != 'github-actions[bot]'
+    # Skip bot-created PRs to avoid loops, and skip gracefully if secret is not configured
+    if: >
+      github.actor != 'github-actions[bot]' &&
+      github.actor != 'coderabbitai[bot]' &&
+      secrets.TENET_AI_KEY != ''
 
     steps:
       - name: Checkout repository
@@ -44,4 +48,5 @@ jobs:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
-          python .github/tenet_agent/tenet_review.py
+          cd .github/tenet_agent
+          python tenet_review.py
