@@ -36,61 +36,101 @@ from prompts import (
     ISSUE_SOLVER_PR_BODY_TEMPLATE,
 )
 
+# Allowed source file extensions for LLM-proposed paths
+_ALLOWED_EXTENSIONS = {
+    ".py", ".ts", ".tsx", ".js", ".jsx",
+    ".json", ".yaml", ".yml", ".md", ".txt", ".env.example",
+}
+
 
 # ─── Parsing helpers ──────────────────────────────────────────────────────────
+
+def _safe_filepath(filepath: str, repo_root: Path) -> str | None:
+    """
+    Validate and normalise a filepath proposed by the LLM.
+
+    Returns the normalised relative path string if safe, or None if the path
+    should be rejected (traversal attempt, .git write, disallowed extension).
+    """
+    filepath = filepath.strip()
+    if not filepath:
+        return None
+
+    # Block disallowed extensions
+    suffix = Path(filepath).suffix.lower()
+    if suffix and suffix not in _ALLOWED_EXTENSIONS:
+        print(f"⚠️  Skipping disallowed file extension from LLM output: {filepath!r}")
+        return None
+
+    candidate = (repo_root / filepath).resolve()
+
+    # Reject anything that escapes the repo root or touches .git
+    if not candidate.is_relative_to(repo_root) or ".git" in candidate.parts:
+        print(f"⚠️  Skipping unsafe path from LLM output: {filepath!r}")
+        return None
+
+    return str(candidate.relative_to(repo_root))
+
 
 def parse_file_changes(llm_output: str) -> dict[str, str] | None:
     """
     Parse the LLM's output into a dict of {filepath: content}.
 
-    Expected format per file:
-        ### FILE: path/to/file.py
-```<lang>
-        <content>
-```
+    Tries three patterns in order of strictness:
+      1. Primary   — ``### FILE: path`` (exact format requested in the prompt)
+      2. Tolerant  — ``## / ### / #### FILE:`` case-insensitive (common LLM drift)
+      3. Bold header — ``**path/to/file.ext**`` followed by a fenced block
+                       (Gemini's default prose formatting)
 
-    Returns None if the LLM flagged CANNOT_FIX.
-    Returns an empty dict if no parseable file blocks were found.
+    Returns None  if the LLM flagged CANNOT_FIX.
+    Returns {}    if no parseable file blocks were found after all patterns.
 
-    All filepaths are validated against the repo root to prevent
-    path traversal attacks from malicious LLM output.
+    All filepaths are validated via _safe_filepath() to prevent path traversal.
     """
     if "### CANNOT_FIX" in llm_output:
         return None
 
-    # Match ### FILE: <path>\n```<lang?>\n<content>\n```
-    pattern = re.compile(
+    # ── Pattern 1: exact ### FILE: (prompt-specified format) ──────────────────
+    primary = re.compile(
         r"###\s*FILE:\s*([^\n]+)\n```[^\n]*\n(.*?)```",
         re.DOTALL,
     )
-    matches = pattern.findall(llm_output)
+    matches = primary.findall(llm_output)
+
+    # ── Pattern 2: tolerant header level + case-insensitive FILE label ─────────
+    if not matches:
+        tolerant = re.compile(
+            r"#{1,4}\s*FILE:\s*([^\n]+)\n```[^\n]*\n(.*?)```",
+            re.DOTALL | re.IGNORECASE,
+        )
+        matches = tolerant.findall(llm_output)
+
+    # ── Pattern 3: bold filename header (Gemini prose default) ────────────────
+    if not matches:
+        bold_header = re.compile(
+            r"\*\*([^\n*]+\.(?:py|ts|tsx|js|jsx|json|ya?ml|md|txt))\*\*\s*\n"
+            r"```[^\n]*\n(.*?)```",
+            re.DOTALL,
+        )
+        matches = bold_header.findall(llm_output)
 
     if not matches:
-        # Fallback: look for ``` blocks with a filepath comment
-        pattern2 = re.compile(r"#\s*([\w/.\-_]+\.\w+)\n(.*?)```", re.DOTALL)
-        matches = pattern2.findall(llm_output)
-
-    if not matches:
+        print("⚠️  parse_file_changes: no FILE blocks matched any pattern.")
+        print("─── RAW LLM OUTPUT (first 2000 chars) ───")
+        print(llm_output[:2000])
+        print("──────────────────────────────────────────")
         return {}
 
     repo_root = Path(".").resolve()
-    changes = {}
+    changes: dict[str, str] = {}
 
     for filepath, content in matches:
-        filepath = filepath.strip()
+        safe = _safe_filepath(filepath, repo_root)
+        if safe is None:
+            continue
         content = content.rstrip()
-
-        if not filepath or not content:
-            continue
-
-        # Guard against path traversal: resolve against repo root and verify
-        # the result stays inside it. Also block writes into .git/.
-        candidate = (repo_root / filepath).resolve()
-        if not candidate.is_relative_to(repo_root) or ".git" in candidate.parts:
-            print(f"⚠️  Skipping unsafe path from LLM output: {filepath!r}")
-            continue
-
-        changes[str(candidate.relative_to(repo_root))] = content
+        if content:
+            changes[safe] = content
 
     return changes
 
@@ -161,6 +201,11 @@ def main():
     )
     code_output = call_llm(model, code_prompt)
     print("✍️  Code generation complete.")
+
+    # ── Debug: log raw output header to aid future parse failures ─────────────
+    print("─── RAW LLM OUTPUT (first 500 chars) ────")
+    print((code_output or "")[:500])
+    print("─────────────────────────────────────────")
 
     # ── Parse file changes ─────────────────────────────────────────────────────
     file_changes = parse_file_changes(code_output)
@@ -237,7 +282,6 @@ def main():
         )
         print(f"✅ PR #{pr.number} created: {pr.html_url}")
 
-        # Add the tenet-agent label to the PR if it exists
         try:
             pr.add_to_labels("tenet-agent")
         except GithubException:
