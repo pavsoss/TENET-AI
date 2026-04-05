@@ -22,7 +22,7 @@ from enum import Enum
 from typing import Any, Optional
 
 import redis.asyncio as redis
-from fastapi import FastAPI, Header, HTTPException
+from fastapi import FastAPI, Header, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -158,10 +158,10 @@ _start_time = time.monotonic()
 
 
 class LLMEventRequest(BaseModel):
-    source_type: str = Field(..., description="chat | agent | api | workflow")
-    source_id: str = Field(..., description="Unique identifier for the source")
-    model: str = Field(..., description="LLM model being used")
-    prompt: str = Field(..., description="The prompt to analyze")
+    source_type: str = Field(..., description="chat | agent | api | workflow", min_length=1, max_length=64)
+    source_id: str = Field(..., description="Unique identifier for the source", min_length=1, max_length=128)
+    model: str = Field(..., description="LLM model being used", min_length=1, max_length=128)
+    prompt: str = Field(..., description="The prompt to analyze", min_length=1, max_length=10000)
     system_prompt: Optional[str] = Field(None)
     metadata: Optional[dict[str, Any]] = Field(default_factory=dict)
 
@@ -184,6 +184,20 @@ class HealthResponse(BaseModel):
     redis_connected: bool
     circuit_state: str
     uptime_seconds: float
+
+
+class EventDetailResponse(BaseModel):
+    event_id: str
+    timestamp: str
+    source_type: str
+    source_id: str
+    model: str
+    prompt: str
+    system_prompt: Optional[str] = None
+    metadata: dict[str, Any] = Field(default_factory=dict)
+    blocked: bool
+    risk_score: float
+    verdict: str
 
 
 async def redis_call(coro):
@@ -294,6 +308,8 @@ async def health_check() -> HealthResponse:
 @app.post("/v1/events/llm", response_model=LLMEventResponse)
 async def ingest_llm_event(request: LLMEventRequest, x_api_key: str = Header(...)):
     verify_api_key(x_api_key)
+    if not request.prompt.strip():
+        raise HTTPException(status_code=422, detail="Prompt must not be empty or whitespace")
 
     event_id = str(uuid.uuid4())
     timestamp = datetime.utcnow().isoformat()
@@ -391,7 +407,11 @@ def quick_heuristic_check(prompt: str) -> tuple[bool, float, str]:
 
 
 @app.get("/v1/events")
-async def list_events(limit: int = 50, offset: int = 0, x_api_key: str = Header(...)):
+async def list_events(
+    limit: int = Query(default=50, ge=1, le=500),
+    offset: int = Query(default=0, ge=0),
+    x_api_key: str = Header(...),
+):
     verify_api_key(x_api_key)
 
     if redis_cb.state == CircuitState.OPEN or not redis_client:
@@ -420,6 +440,30 @@ async def list_events(limit: int = 50, offset: int = 0, x_api_key: str = Header(
         raise
     except Exception as exc:  # noqa: BLE001
         logger.error("Failed to list events: %s", exc)
+        raise HTTPException(status_code=500, detail="Internal server error") from exc
+
+
+@app.get("/v1/events/{event_id}", response_model=EventDetailResponse)
+async def get_event(event_id: str, x_api_key: str = Header(...)):
+    verify_api_key(x_api_key)
+
+    if not event_id.strip():
+        raise HTTPException(status_code=422, detail="event_id must not be empty")
+
+    if redis_cb.state == CircuitState.OPEN or not redis_client:
+        raise HTTPException(status_code=503, detail="Service degraded - event store unavailable")
+
+    try:
+        data = await redis_call(redis_client.get(f"tenet:event:{event_id}"))
+        if data is None:
+            raise HTTPException(status_code=503, detail="Service degraded - event store unavailable")
+        if not data:
+            raise HTTPException(status_code=404, detail="Event not found")
+        return EventDetailResponse(**json.loads(data))
+    except HTTPException:
+        raise
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Failed to retrieve event %s: %s", event_id, exc)
         raise HTTPException(status_code=500, detail="Internal server error") from exc
 
 

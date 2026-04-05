@@ -200,6 +200,59 @@ class TestRequestValidation:
         )
         assert response.status_code == 422
 
+    @patch('services.ingest.app.redis_client', None)
+    def test_rejects_whitespace_only_prompt(self):
+        """Test that whitespace-only prompts are rejected."""
+        response = client.post(
+            "/v1/events/llm",
+            headers={"X-API-Key": TEST_API_KEY},
+            json={
+                "source_type": "chat",
+                "source_id": "test-123",
+                "model": "gpt-4",
+                "prompt": "   "
+            }
+        )
+        assert response.status_code == 422
+
+    def test_rejects_invalid_pagination_limit(self):
+        """Test list endpoint query bounds."""
+        response = client.get(
+            "/v1/events?limit=0",
+            headers={"X-API-Key": TEST_API_KEY},
+        )
+        assert response.status_code == 422
+
+
+class TestEventRetrievalEndpoint:
+    """Tests for event lookup by id endpoint."""
+
+    @patch("services.ingest.app.redis_client", MagicMock())
+    @patch("services.ingest.app.redis_call", new_callable=AsyncMock)
+    def test_get_event_returns_event(self, mock_redis_call):
+        """Should return an event payload when it exists."""
+        mock_redis_call.return_value = '{"event_id":"evt-1","timestamp":"2026-01-01T00:00:00","source_type":"chat","source_id":"src-1","model":"gpt-4","prompt":"hello","system_prompt":null,"metadata":{},"blocked":false,"risk_score":0.0,"verdict":"benign"}'
+
+        response = client.get(
+            "/v1/events/evt-1",
+            headers={"X-API-Key": TEST_API_KEY},
+        )
+        assert response.status_code == 200
+        payload = response.json()
+        assert payload["event_id"] == "evt-1"
+        assert payload["verdict"] == "benign"
+
+    @patch("services.ingest.app.redis_client", MagicMock())
+    @patch("services.ingest.app.redis_call", new_callable=AsyncMock)
+    def test_get_event_returns_404_when_missing(self, mock_redis_call):
+        """Should return 404 when an event key does not exist."""
+        mock_redis_call.return_value = ""
+        response = client.get(
+            "/v1/events/missing-event",
+            headers={"X-API-Key": TEST_API_KEY},
+        )
+        assert response.status_code == 404
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
