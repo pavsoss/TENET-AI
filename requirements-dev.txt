@@ -23,7 +23,7 @@ safety>=3.0.0  # Updated for latest vulnerability database
 
 # Development Tools
 ipython>=8.18.1
-watchdog>=3.0.0
+watchdog>=6.0.0
 
 # Type Stubs
 types-requests>=2.31.0
