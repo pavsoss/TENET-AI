@@ -274,7 +274,7 @@ http://localhost:8100
 ### Build Image
 
 ```bash
-docker build -t tenet-analyzer .
+docker build -f services/analyzer/Dockerfile -t tenet-analyzer .
 ```
 
 ### Run Container
