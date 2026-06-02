@@ -20,9 +20,11 @@ The Analyzer Service provides:
 
 The service uses both rule-based heuristics and trained machine learning models to classify prompts as:
 
-* **Benign**
-* **Suspicious**
-* **Malicious**
+* Benign
+* Suspicious
+* Malicious
+* Unknown
+* Error
 
 ---
 
