@@ -13,7 +13,7 @@
   --amber:#FFB800;--amber-dim:rgba(255,184,0,0.1);
   --green:#00FF88;--green-dim:rgba(0,255,136,0.1);
   --purple:#B47FFF;--purple-dim:rgba(180,127,255,0.1);
-  --text:#dde1ef;--text2:#8890a8;--text3:#484f66;
+  --text:#dde1ef;--text2:#8890a8;--text3:#6b7394;
   --font:'Inter',sans-serif;--mono:'JetBrains Mono',monospace;
   --radius:10px;
 }
@@ -370,46 +370,215 @@ body{background:var(--bg);color:var(--text);font-family:var(--font);-webkit-font
   html{scroll-behavior:auto}
 }
 
+/* ── HAMBURGER BUTTON ─────────────────────────────────────── */
+.hamburger-btn{display:none;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;padding:6px;width:36px;height:36px;align-items:center;justify-content:center;flex-shrink:0;outline:none;transition:border-color 0.15s}
+.hamburger-btn:hover{border-color:var(--cyan)}
+.hamburger-btn:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.hamburger-icon{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;width:18px;height:18px;position:relative}
+.hamburger-icon span{display:block;width:16px;height:2px;background:var(--text);border-radius:1px;transition:all 0.25s ease}
+.hamburger-icon.open span:nth-child(1){transform:translateY(6px) rotate(45deg)}
+.hamburger-icon.open span:nth-child(2){opacity:0;transform:scaleX(0)}
+.hamburger-icon.open span:nth-child(3){transform:translateY(-6px) rotate(-45deg)}
+
+/* ── MOBILE MENU OVERLAY ──────────────────────────────────── */
+.mobile-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);z-index:98;opacity:0;pointer-events:none;transition:opacity 0.25s ease}
+.mobile-overlay.visible{opacity:1;pointer-events:all}
+
+.mobile-menu{position:fixed;top:52px;right:0;bottom:0;width:min(320px,85vw);background:var(--surface);border-left:1px solid var(--border);z-index:99;transform:translateX(100%);transition:transform 0.3s cubic-bezier(0.4,0,0.2,1);display:flex;flex-direction:column;overflow-y:auto}
+.mobile-menu.open{transform:translateX(0)}
+
+.mobile-menu-links{display:flex;flex-direction:column;padding:12px 0;flex:1}
+.mobile-menu-link{display:flex;align-items:center;gap:12px;padding:14px 24px;font-size:14px;font-weight:500;color:var(--text2);text-decoration:none;transition:all 0.15s;border-left:3px solid transparent}
+.mobile-menu-link:hover{background:rgba(0,229,255,0.04);color:var(--text)}
+.mobile-menu-link.active{color:var(--cyan);border-left-color:var(--cyan);background:var(--cyan-dim)}
+.mobile-menu-icon{display:flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);flex-shrink:0}
+
+.mobile-menu-footer{padding:20px 24px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:12px}
+.mobile-menu-github{display:flex;gap:8px}
+.mobile-menu-github .btn{flex:1;justify-content:center}
+.mobile-menu-cta{width:100%;justify-content:center;text-align:center}
+
 /* ── RESPONSIVE ────────────────────────────────────────────── */
+
+/* Large desktop — shrink nav links */
 @media(min-width:1181px) and (max-width:1380px){
   .nav-link{padding:0 8px;gap:4px;font-size:11.5px}
   .nav-link svg{display:none}
 }
+
+/* Tablet landscape — hide desktop nav, show hamburger */
 @media(max-width:1180px){
   .nav{display:none}
+  .hamburger-btn{display:flex}
+  .live-badge{display:none}
+  .shortcut-hint{display:none}
 }
+
+/* Tablet portrait */
 @media(max-width:1024px){
-  .hero-inner{grid-template-columns:1fr}.preview{display:none}
+  /* Hero: single column, show preview below, center content */
+  .hero-inner{grid-template-columns:1fr;gap:40px}
+  .hero-content{display:flex;flex-direction:column;align-items:center;text-align:center}
+  .hero-desc{margin-left:auto;margin-right:auto}
+  .hero-actions{justify-content:center}
+  .hero-pills{justify-content:center;margin:0 auto}
+  .preview{display:block}
+
+  /* Feature grid: 2 columns */
   .feat-grid{grid-template-columns:1fr 1fr}
-  .how-grid{grid-template-columns:1fr 1fr;gap:28px}.how-line{display:none}
+
+  /* Pipeline steps: 2 columns */
+  .how-grid{grid-template-columns:1fr 1fr;gap:28px}
+  .how-line{display:none}
+
+  /* Stats: 3 columns */
   .stats-grid{grid-template-columns:repeat(3,1fr)}
+
+  /* Demo: single column, attack tabs become horizontal scroll */
   .demo-grid{grid-template-columns:1fr}
-  .pipeline-flow{flex-wrap:wrap;gap:8px}
+  .demo-attacks{flex-direction:row;overflow-x:auto;gap:8px;padding-bottom:8px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .demo-attacks::-webkit-scrollbar{display:none}
+  .demo-attack-btn{flex:0 0 220px;min-width:220px}
+
+  /* Pipeline flow: wrap better */
+  .pipeline-flow{flex-wrap:wrap;gap:8px;justify-content:center}
+  .pipeline-flow-arrow{width:24px}
+
+  /* Architecture SVG: horizontal scroll */
+  .arch-svg-wrap{padding:16px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .arch-svg{min-width:600px}
+
+  /* Footer: 2 columns */
   .footer-grid{grid-template-columns:1fr 1fr}
-  .arch-svg-wrap{padding:16px}
 }
+
+/* Mobile landscape / small tablets */
 @media(max-width:768px){
+  /* Hero */
   .hero{padding:60px 0 48px}
-  .hero-title{font-size:38px}
-  .install-grid{grid-template-columns:1fr}
-  .feat-grid{grid-template-columns:1fr}
-  .threat{grid-template-columns:1fr;gap:12px}.threat-num{text-align:left}
+  .hero-title{font-size:36px}
+  .hero-desc{font-size:14px}
+  .container{padding:0 20px}
+
+  /* Section spacing */
+  .section{padding:60px 0}
+
+  /* Topbar */
+  .topbar{padding:0 16px}
+  .brand-name{font-size:13px}
+  .brand-badge{display:none}
+  .github-forks-btn{display:none}
+
+  /* Stats: 2 columns */
   .stats-grid{grid-template-columns:repeat(2,1fr)}
   .stat-block:nth-child(2n){border-right:none}
-  .topbar{padding:0 16px}
-  .nav{display:none}
-  .section{padding:60px 0}
-  .footer-grid{grid-template-columns:1fr;gap:24px}
+  .stat-val{font-size:28px}
+
+  /* Feature grid: single column */
+  .feat-grid{grid-template-columns:1fr}
+
+  /* Install grid: single column */
+  .install-grid{grid-template-columns:1fr}
+
+  /* Threat cards: single column */
+  .threat{grid-template-columns:1fr;gap:12px}
+  .threat-num{text-align:left;display:flex;gap:8px;align-items:baseline}
+  .threat-list-wrap{padding-left:20px}
+  .timeline-node{left:-15px}
+
+  /* Pipeline flow: hide on mobile, steps explain it */
+  .pipeline-flow{display:none}
+
+  /* Comparison table */
   .compare-table{font-size:11px}
   .compare-table th,.compare-table td{padding:10px 12px}
-  .threat-list-wrap{padding-left:20px}
+
+  /* Footer */
+  .footer-grid{grid-template-columns:1fr;gap:24px}
+  .footer-bottom{flex-direction:column;text-align:center}
+
+  /* CTA */
+  .cta{padding:64px 0}
+  .cta-title{font-size:32px}
+
+  /* How grid: single column */
+  .how-grid{grid-template-columns:1fr;gap:20px}
+  .how-step{text-align:left;padding:16px 20px;border-left:2px solid var(--border);border-radius:0}
+  .how-step::before{display:none}
+  .how-num{margin:0 0 12px 0}
+  .how-step-number{top:auto;right:auto;position:static;margin-bottom:4px}
+
+  /* Demo attack buttons: smaller for mobile scroll */
+  .demo-attack-btn{flex:0 0 200px;min-width:200px;padding:12px 14px}
+  .demo-attack-name{font-size:12px}
+
+  /* Back to top: adjust position */
+  .back-to-top{bottom:16px;right:16px;width:40px;height:40px}
+
+  /* Code blocks */
+  .code-body{padding:16px;font-size:11.5px}
 }
+
+/* Mobile portrait */
 @media(max-width:480px){
+  /* Stats: single column */
   .stats-grid{grid-template-columns:1fr}
   .stat-block{border-right:none!important;border-bottom:1px solid var(--border)}
   .stat-block:last-child{border-bottom:none}
-  .cta-title{font-size:30px}
-  .hero-title{font-size:30px}
+
+  /* Hero */
+  .hero-title{font-size:28px}
+  .hero-desc{font-size:13px;margin-bottom:28px}
   .hero-actions{flex-direction:column}
-  .hero-pills{gap:12px}
+  .hero-actions .btn{width:100%;justify-content:center}
+  .hero-pills{gap:10px;flex-direction:column;align-items:flex-start;width:fit-content;margin:0 auto}
+  .hero-pill{font-size:11px}
+
+  /* Preview terminal: smaller stats */
+  .p-stats{grid-template-columns:1fr}
+  .p-stat-v{font-size:20px}
+
+  /* CTA */
+  .cta-title{font-size:26px}
+  .cta-sub{font-size:13px}
+  .cta-btns{flex-direction:column;align-items:center}
+  .cta-chips{flex-direction:column;align-items:center}
+
+  /* Topbar: hide stars too */
+  .github-stars-btn{display:none}
+  .brand{min-width:auto;gap:8px}
+
+  /* Section titles */
+  .section-title{font-size:26px}
+
+  /* Demo panel */
+  .demo-panel{min-height:280px}
+  .demo-panel-body{padding:16px}
+  .demo-prompt-text{font-size:10.5px;padding:10px}
+
+  /* Install cards */
+  .install-cmd{font-size:10.5px;padding:10px 14px}
+  .install-title{font-size:14px}
+
+  /* Comparison: hint for scroll */
+  .compare-wrap{position:relative}
+  .compare-wrap::after{content:'← Scroll →';position:absolute;bottom:-24px;left:50%;transform:translateX(-50%);font-size:10px;color:var(--text3);font-family:var(--mono);letter-spacing:0.08em}
+
+  /* Footer */
+  .footer{padding:36px 0 28px}
+  .footer-brand-desc{font-size:11px}
+  .footer-copy{font-size:10px}
 }
+
+/* Extra small (iPhone SE, etc.) */
+@media(max-width:360px){
+  .container{padding:0 14px}
+  .hero-title{font-size:24px}
+  .section-title{font-size:22px}
+  .hero{padding:48px 0 36px}
+  .topbar{padding:0 10px}
+  .brand-name{font-size:12px}
+  .btn-xl{font-size:13px;padding:12px 20px}
+  .stat-val{font-size:24px}
+}
+

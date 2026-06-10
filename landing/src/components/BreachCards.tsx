@@ -159,61 +159,62 @@ export default function BreachCards() {
               const isExpanded = expandedIds.includes(t.id);
               return (
                 <FadeUp key={t.id} delay={i * 0.07}>
-                  {/* Timeline node dot */}
-                  <div 
-                    className="timeline-node" 
-                    style={{ 
-                      borderColor: t.lc, 
-                      top: `${i * 240 + 20}px`,
-                      boxShadow: `0 0 8px ${t.lc}` 
-                    }} 
-                  />
+                  <div style={{ position: 'relative' }}>
+                    {/* Timeline node dot */}
+                    <div 
+                      className="timeline-node" 
+                      style={{ 
+                        borderColor: t.lc, 
+                        boxShadow: `0 0 8px ${t.lc}` 
+                      }} 
+                    />
 
-                  <div className="threat" style={{ borderLeftColor: t.lc }}>
-                    <div className="threat-meta">
-                      <span className="threat-date">{t.date}</span>
-                      <span className="threat-sev" style={{ color: t.sc, background: t.sb }}>
-                        ● {t.sev}
-                      </span>
-                      <span className="threat-type">{t.type}</span>
-                    </div>
-
-                    <div>
-                      <div className="threat-title">{t.title}</div>
-                      <div className="threat-desc">{t.desc}</div>
-                      
-                      {/* Interactive toggle header */}
-                      <button
-                        className="threat-resp-toggle"
-                        onClick={() => toggleExpand(t.id)}
-                        aria-expanded={isExpanded}
-                        aria-controls={`threat-resp-${t.id}`}
-                      >
-                        <svg className={`threat-resp-arrow ${isExpanded ? 'expanded' : ''}`} width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
-                          <polyline points="9 18 15 12 9 6" />
-                        </svg>
-                        <span className="threat-resp-lbl" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
-                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                          </svg>
-                          TENET AI RESPONSE
+                    <div className="threat" style={{ borderLeftColor: t.lc }}>
+                      <div className="threat-meta">
+                        <span className="threat-date">{t.date}</span>
+                        <span className="threat-sev" style={{ color: t.sc, background: t.sb }}>
+                          ● {t.sev}
                         </span>
-                      </button>
+                        <span className="threat-type">{t.type}</span>
+                      </div>
 
-                      {/* Expandable content panel */}
-                      <div 
-                        id={`threat-resp-${t.id}`} 
-                        className={`threat-resp-content ${isExpanded ? 'expanded' : ''}`}
-                      >
-                        <div className="threat-resp-text">
-                          {t.resp}
+                      <div>
+                        <div className="threat-title">{t.title}</div>
+                        <div className="threat-desc">{t.desc}</div>
+                        
+                        {/* Interactive toggle header */}
+                        <button
+                          className="threat-resp-toggle"
+                          onClick={() => toggleExpand(t.id)}
+                          aria-expanded={isExpanded}
+                          aria-controls={`threat-resp-${t.id}`}
+                        >
+                          <svg className={`threat-resp-arrow ${isExpanded ? 'expanded' : ''}`} width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '6px' }}>
+                            <polyline points="9 18 15 12 9 6" />
+                          </svg>
+                          <span className="threat-resp-lbl" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ verticalAlign: 'middle' }}>
+                              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                            </svg>
+                            TENET AI RESPONSE
+                          </span>
+                        </button>
+
+                        {/* Expandable content panel */}
+                        <div 
+                          id={`threat-resp-${t.id}`} 
+                          className={`threat-resp-content ${isExpanded ? 'expanded' : ''}`}
+                        >
+                          <div className="threat-resp-text">
+                            {t.resp}
+                          </div>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="threat-num">
-                      <div className="threat-num-val" style={{ color: t.sc }}>{t.stat}</div>
-                      <div className="threat-num-lbl">{t.sl}</div>
+                      <div className="threat-num">
+                        <div className="threat-num-val" style={{ color: t.sc }}>{t.stat}</div>
+                        <div className="threat-num-lbl">{t.sl}</div>
+                      </div>
                     </div>
                   </div>
                 </FadeUp>

@@ -145,7 +145,7 @@ export default function DemoSection() {
             {ATTACKS.map(attack => {
               const isActive = attack.id === selectedId;
               return (
-                <button
+                <div
                   key={attack.id}
                   role="tab"
                   aria-selected={isActive}
@@ -153,7 +153,13 @@ export default function DemoSection() {
                   className={`demo-attack-btn ${isActive ? 'active' : ''}`}
                   style={isActive ? { borderLeftColor: attack.color } : {}}
                   onClick={() => setSelectedId(attack.id)}
-                  onKeyDown={(e) => handleKeyDown(e, attack.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                      e.preventDefault();
+                      setSelectedId(attack.id);
+                    }
+                    handleKeyDown(e, attack.id);
+                  }}
                 >
                   <div className="demo-attack-name">{attack.name}</div>
                   <div className="demo-attack-preview">{attack.prompt}</div>
@@ -164,7 +170,7 @@ export default function DemoSection() {
                   >
                     {copiedId === attack.id ? 'Copied!' : 'Copy'}
                   </button>
-                </button>
+                </div>
               );
             })}
           </div>

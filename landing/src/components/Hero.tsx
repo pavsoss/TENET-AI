@@ -21,7 +21,7 @@ export default function Hero() {
       <div className="container">
         <div className="hero-inner">
           {/* Left Column */}
-          <div>
+          <div className="hero-content">
             {/* Logo above headline with ambient glow */}
             <div className="hero-logo-wrap hero-enter-logo">
               <TenetLogo size={48} />

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import TenetLogo from './TenetLogo';
 
 interface NavItem {
@@ -11,6 +11,29 @@ export default function Navbar() {
   const [activeSection, setActiveSection] = useState('home');
   const [stars, setStars] = useState('7');
   const [forks, setForks] = useState('10');
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Close menu on Escape key
+  const handleEscape = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape' && menuOpen) {
+      setMenuOpen(false);
+    }
+  }, [menuOpen]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleEscape);
+    return () => window.removeEventListener('keydown', handleEscape);
+  }, [handleEscape]);
+
+  // Lock body scroll when menu is open
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [menuOpen]);
 
   useEffect(() => {
     // Fetch GitHub repository statistics
@@ -160,77 +183,160 @@ export default function Navbar() {
       el.scrollIntoView({ behavior: 'smooth' });
       setActiveSection(id);
     }
+    setMenuOpen(false);
   };
 
   return (
-    <header className="topbar">
-      <a href="#home" className="brand" onClick={(e) => handleLinkClick(e, 'home')}>
-        <div className="brand-logo">
-          <TenetLogo size={28} />
-        </div>
-        <span className="brand-name">TENET AI Dev</span>
-        <span className="brand-badge">v2.0</span>
-      </a>
+    <>
+      <header className="topbar">
+        <a href="#home" className="brand" onClick={(e) => handleLinkClick(e, 'home')}>
+          <div className="brand-logo">
+            <TenetLogo size={28} />
+          </div>
+          <span className="brand-name">TENET AI Dev</span>
+          <span className="brand-badge">v2.0</span>
+        </a>
 
-      <nav className="nav">
-        {navItems.map(item => (
+        {/* Desktop Navigation */}
+        <nav className="nav">
+          {navItems.map(item => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={`nav-link ${activeSection === item.id ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, item.id)}
+            >
+              {item.icon}
+              {item.label}
+            </a>
+          ))}
+        </nav>
+
+        <div className="topbar-right">
+          <div className="live-badge" aria-label="System status online">
+            <div className="dot" />
+            LIVE
+          </div>
+          
+          {/* Shortcut Hint */}
+          <span className="shortcut-hint" title="Press '/' key to focus the first CTA">
+            [/] focus
+          </span>
+
           <a
-            key={item.id}
-            href={`#${item.id}`}
-            className={`nav-link ${activeSection === item.id ? 'active' : ''}`}
-            onClick={(e) => handleLinkClick(e, item.id)}
+            href="https://github.com/TENET-DEV-AI/TENET-AI"
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-ghost btn-sm github-stars-btn"
+            aria-label="GitHub Stars"
           >
-            {item.icon}
-            {item.label}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+            {stars}
           </a>
-        ))}
-      </nav>
 
-      <div className="topbar-right">
-        <div className="live-badge" aria-label="System status online">
-          <div className="dot" />
-          LIVE
+          <a
+            href="https://github.com/TENET-DEV-AI/TENET-AI/fork"
+            target="_blank"
+            rel="noreferrer"
+            className="btn btn-ghost btn-sm github-forks-btn"
+            aria-label="GitHub Forks"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+              <circle cx="12" cy="18" r="3" />
+              <circle cx="6" cy="6" r="3" />
+              <circle cx="18" cy="6" r="3" />
+              <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9" />
+              <path d="M12 12v3" />
+            </svg>
+            {forks}
+          </a>
+
+          <a href="#download" className="btn btn-primary btn-sm" onClick={(e) => handleLinkClick(e, 'download')}>
+            Download
+          </a>
+
+          {/* Hamburger Button — visible only on mobile/tablet via CSS */}
+          <button
+            className="hamburger-btn"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            aria-label={menuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+          >
+            <span className={`hamburger-icon ${menuOpen ? 'open' : ''}`}>
+              <span />
+              <span />
+              <span />
+            </span>
+          </button>
         </div>
-        
-        {/* Shortcut Hint */}
-        <span className="shortcut-hint" title="Press '/' key to focus the first CTA">
-          [/] focus
-        </span>
+      </header>
 
-        <a
-          href="https://github.com/TENET-DEV-AI/TENET-AI"
-          target="_blank"
-          rel="noreferrer"
-          className="btn btn-ghost btn-sm"
-          aria-label="GitHub Stars"
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-          {stars}
-        </a>
+      {/* Mobile Menu Overlay */}
+      <div
+        className={`mobile-overlay ${menuOpen ? 'visible' : ''}`}
+        onClick={() => setMenuOpen(false)}
+        aria-hidden="true"
+      />
+      <nav
+        id="mobile-menu"
+        className={`mobile-menu ${menuOpen ? 'open' : ''}`}
+        aria-label="Mobile navigation"
+      >
+        <div className="mobile-menu-links">
+          {navItems.map(item => (
+            <a
+              key={item.id}
+              href={`#${item.id}`}
+              className={`mobile-menu-link ${activeSection === item.id ? 'active' : ''}`}
+              onClick={(e) => handleLinkClick(e, item.id)}
+            >
+              <span className="mobile-menu-icon">{item.icon}</span>
+              {item.label}
+            </a>
+          ))}
+        </div>
 
-        <a
-          href="https://github.com/TENET-DEV-AI/TENET-AI/fork"
-          target="_blank"
-          rel="noreferrer"
-          className="btn btn-ghost btn-sm"
-          aria-label="GitHub Forks"
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
-            <circle cx="12" cy="18" r="3" />
-            <circle cx="6" cy="6" r="3" />
-            <circle cx="18" cy="6" r="3" />
-            <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9" />
-            <path d="M12 12v3" />
-          </svg>
-          {forks}
-        </a>
-
-        <a href="#download" className="btn btn-primary btn-sm" onClick={(e) => handleLinkClick(e, 'download')}>
-          Download
-        </a>
-      </div>
-    </header>
+        <div className="mobile-menu-footer">
+          <div className="mobile-menu-github">
+            <a
+              href="https://github.com/TENET-DEV-AI/TENET-AI"
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-ghost btn-sm"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+              {stars} Stars
+            </a>
+            <a
+              href="https://github.com/TENET-DEV-AI/TENET-AI/fork"
+              target="_blank"
+              rel="noreferrer"
+              className="btn btn-ghost btn-sm"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="18" r="3" />
+                <circle cx="6" cy="6" r="3" />
+                <circle cx="18" cy="6" r="3" />
+                <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9" />
+                <path d="M12 12v3" />
+              </svg>
+              {forks} Forks
+            </a>
+          </div>
+          <a
+            href="#download"
+            className="btn btn-primary btn-md mobile-menu-cta"
+            onClick={(e) => handleLinkClick(e, 'download')}
+          >
+            Download TENET AI
+          </a>
+        </div>
+      </nav>
+    </>
   );
 }
