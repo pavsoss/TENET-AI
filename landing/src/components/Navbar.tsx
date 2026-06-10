@@ -1,0 +1,236 @@
+import React, { useState, useEffect } from 'react';
+import TenetLogo from './TenetLogo';
+
+interface NavItem {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+}
+
+export default function Navbar() {
+  const [activeSection, setActiveSection] = useState('home');
+  const [stars, setStars] = useState('7');
+  const [forks, setForks] = useState('10');
+
+  useEffect(() => {
+    // Fetch GitHub repository statistics
+    fetch('https://api.github.com/repos/TENET-DEV-AI/TENET-AI')
+      .then(res => res.json())
+      .then(data => {
+        if (data.stargazers_count !== undefined) {
+          const s = data.stargazers_count;
+          setStars(s >= 1000 ? (s / 1000).toFixed(1) + 'k' : String(s));
+        }
+        if (data.forks_count !== undefined) {
+          const f = data.forks_count;
+          setForks(f >= 1000 ? (f / 1000).toFixed(1) + 'k' : String(f));
+        }
+      })
+      .catch(() => {});
+
+    // Active Section Tracking via IntersectionObserver
+    const sections = ['home', 'pipeline', 'features', 'demo', 'compare', 'architecture', 'threats', 'download'];
+    const observers = sections.map(id => {
+      const el = document.getElementById(id);
+      if (!el) return null;
+      const obs = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) {
+          setActiveSection(id);
+        }
+      }, { threshold: 0.25 });
+      obs.observe(el);
+      return { obs, el };
+    });
+
+    // Keyboard shortcut '/' to focus primary CTA button
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/') {
+        const ctaBtn = document.querySelector('.btn-primary') as HTMLElement;
+        if (ctaBtn) {
+          e.preventDefault();
+          ctaBtn.focus();
+          ctaBtn.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      observers.forEach(o => {
+        if (o) o.obs.unobserve(o.el);
+      });
+    };
+  }, []);
+
+  const navItems: NavItem[] = [
+    {
+      id: 'home',
+      label: 'Dashboard',
+      icon: (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+        </svg>
+      )
+    },
+    {
+      id: 'pipeline',
+      label: 'Pipeline',
+      icon: (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="2" y="2" width="6" height="6" rx="1" />
+          <rect x="16" y="2" width="6" height="6" rx="1" />
+          <rect x="9" y="16" width="6" height="6" rx="1" />
+          <path d="M5 8v4h14V8" />
+          <path d="M12 12v4" />
+        </svg>
+      )
+    },
+    {
+      id: 'features',
+      label: 'Features',
+      icon: (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="3" width="7" height="7" />
+          <rect x="14" y="3" width="7" height="7" />
+          <rect x="14" y="14" width="7" height="7" />
+          <rect x="3" y="14" width="7" height="7" />
+        </svg>
+      )
+    },
+    {
+      id: 'demo',
+      label: 'Sandbox',
+      icon: (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="4 17 10 11 4 5" />
+          <line x1="12" y1="19" x2="20" y2="19" />
+        </svg>
+      )
+    },
+    {
+      id: 'compare',
+      label: 'Comparison',
+      icon: (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <line x1="18" y1="20" x2="18" y2="10" />
+          <line x1="12" y1="20" x2="12" y2="4" />
+          <line x1="6" y1="20" x2="6" y2="14" />
+        </svg>
+      )
+    },
+    {
+      id: 'architecture',
+      label: 'Architecture',
+      icon: (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <polygon points="12 2 2 7 12 12 22 7 12 2" />
+          <polyline points="2 17 12 22 22 17" />
+          <polyline points="2 12 12 17 22 12" />
+        </svg>
+      )
+    },
+    {
+      id: 'threats',
+      label: 'Case Studies',
+      icon: (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+        </svg>
+      )
+    },
+    {
+      id: 'download',
+      label: 'Install',
+      icon: (
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+          <polyline points="7 10 12 15 17 10" />
+          <line x1="12" y1="15" x2="12" y2="3" />
+        </svg>
+      )
+    }
+  ];
+
+  const handleLinkClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+      setActiveSection(id);
+    }
+  };
+
+  return (
+    <header className="topbar">
+      <a href="#home" className="brand" onClick={(e) => handleLinkClick(e, 'home')}>
+        <div className="brand-logo">
+          <TenetLogo size={28} />
+        </div>
+        <span className="brand-name">TENET AI Dev</span>
+        <span className="brand-badge">v2.0</span>
+      </a>
+
+      <nav className="nav">
+        {navItems.map(item => (
+          <a
+            key={item.id}
+            href={`#${item.id}`}
+            className={`nav-link ${activeSection === item.id ? 'active' : ''}`}
+            onClick={(e) => handleLinkClick(e, item.id)}
+          >
+            {item.icon}
+            {item.label}
+          </a>
+        ))}
+      </nav>
+
+      <div className="topbar-right">
+        <div className="live-badge" aria-label="System status online">
+          <div className="dot" />
+          LIVE
+        </div>
+        
+        {/* Shortcut Hint */}
+        <span className="shortcut-hint" title="Press '/' key to focus the first CTA">
+          [/] focus
+        </span>
+
+        <a
+          href="https://github.com/TENET-DEV-AI/TENET-AI"
+          target="_blank"
+          rel="noreferrer"
+          className="btn btn-ghost btn-sm"
+          aria-label="GitHub Stars"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+          {stars}
+        </a>
+
+        <a
+          href="https://github.com/TENET-DEV-AI/TENET-AI/fork"
+          target="_blank"
+          rel="noreferrer"
+          className="btn btn-ghost btn-sm"
+          aria-label="GitHub Forks"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ marginRight: '4px' }}>
+            <circle cx="12" cy="18" r="3" />
+            <circle cx="6" cy="6" r="3" />
+            <circle cx="18" cy="6" r="3" />
+            <path d="M18 9v2c0 .6-.4 1-1 1H7c-.6 0-1-.4-1-1V9" />
+            <path d="M12 12v3" />
+          </svg>
+          {forks}
+        </a>
+
+        <a href="#download" className="btn btn-primary btn-sm" onClick={(e) => handleLinkClick(e, 'download')}>
+          Download
+        </a>
+      </div>
+    </header>
+  );
+}
