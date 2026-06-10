@@ -117,7 +117,7 @@ export default function StatsSection() {
       suffix: '+',
       label: 'LLM providers',
       sub: 'native integrations',
-      color: '#FFB800', // Gold / Amber
+      color: 'var(--amber)',
       trend: 'M0 15 C 10 5, 20 5, 30 10 C 40 15, 50 15, 60 5'
     }
   ];
