@@ -69,7 +69,7 @@ const ATTACKS: AttackSample[] = [
     confidence: '89.2% Match',
     bullets: [
       'Detected administrative authority spoofing pattern.',
-      'Request requests safety guidelines bypass.',
+      'Requests safety guidelines bypass.',
       'Security rating: Elevated Risk. Forwarded to SOC for review.'
     ]
   }
