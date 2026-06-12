@@ -70,10 +70,13 @@ jobs:
 
       - name: Determine Docker tags
         id: docker-tags
+        env:
+          REPOSITORY: ${{ github.repository }}
+          TAG_NAME: ${{ github.ref_name }}
         run: |
-          TAGS="ghcr.io/${{ github.repository }}:${{ github.ref_name }}"
-          if [[ ! "${{ github.ref_name }}" =~ -(rc|beta|alpha) ]]; then
-            TAGS="${TAGS},ghcr.io/${{ github.repository }}:latest"
+          TAGS="ghcr.io/${REPOSITORY}:${TAG_NAME}"
+          if [[ ! "${TAG_NAME}" =~ -(rc|beta|alpha) ]]; then
+            TAGS="${TAGS},ghcr.io/${REPOSITORY}:latest"
           fi
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
 
