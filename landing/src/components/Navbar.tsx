@@ -65,22 +65,7 @@ export default function Navbar() {
       return { obs, el };
     });
 
-    // Keyboard shortcut '/' to focus primary CTA button
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === '/') {
-        const ctaBtn = document.querySelector('.btn-primary') as HTMLElement;
-        if (ctaBtn) {
-          e.preventDefault();
-          ctaBtn.focus();
-          ctaBtn.scrollIntoView({ behavior: 'smooth' });
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
       observers.forEach(o => {
         if (o) o.obs.unobserve(o.el);
       });
@@ -144,17 +129,6 @@ export default function Navbar() {
       )
     },
     {
-      id: 'architecture',
-      label: 'Architecture',
-      icon: (
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <polygon points="12 2 2 7 12 12 22 7 12 2" />
-          <polyline points="2 17 12 22 22 17" />
-          <polyline points="2 12 12 17 22 12" />
-        </svg>
-      )
-    },
-    {
       id: 'threats',
       label: 'Case Studies',
       icon: (
@@ -194,7 +168,7 @@ export default function Navbar() {
             <TenetLogo size={28} />
           </div>
           <span className="brand-name">TENET AI Dev</span>
-          <span className="brand-badge">v2.0</span>
+          <span className="brand-badge">v0.1</span>
         </a>
 
         {/* Desktop Navigation */}
@@ -217,11 +191,6 @@ export default function Navbar() {
             <div className="dot" />
             LIVE
           </div>
-          
-          {/* Shortcut Hint */}
-          <span className="shortcut-hint" title="Press '/' key to focus the first CTA">
-            [/] focus
-          </span>
 
           <a
             href="https://github.com/TENET-DEV-AI/TENET-AI"
@@ -254,6 +223,11 @@ export default function Navbar() {
           </a>
 
           <a href="#download" className="btn btn-primary btn-sm" onClick={(e) => handleLinkClick(e, 'download')}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
             Download
           </a>
 
@@ -333,6 +307,11 @@ export default function Navbar() {
             className="btn btn-primary btn-md mobile-menu-cta"
             onClick={(e) => handleLinkClick(e, 'download')}
           >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+              <polyline points="7 10 12 15 17 10" />
+              <line x1="12" y1="15" x2="12" y2="3" />
+            </svg>
             Download TENET AI
           </a>
         </div>

@@ -2,11 +2,10 @@ import React from 'react';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import StatsSection from './components/StatsSection';
-import PipelineSection from './components/PipelineSection';
+import UnifiedArchitectureSection from './components/UnifiedArchitectureSection';
 import FeaturesSection from './components/FeaturesSection';
 import DemoSection from './components/DemoSection';
 import ComparisonTable from './components/ComparisonTable';
-import ArchitectureDiagram from './components/ArchitectureDiagram';
 import BreachCards from './components/BreachCards';
 import InstallSection from './components/InstallSection';
 import CtaSection from './components/CtaSection';
@@ -31,8 +30,8 @@ export default function App() {
         {/* Section 2: Core Metrics & Counter Animation Strip */}
         <StatsSection />
 
-        {/* Section 3: Threat Mitigation Pipeline Flow */}
-        <PipelineSection />
+        {/* Section 3: Threat Mitigation Pipeline Flow & Architecture */}
+        <UnifiedArchitectureSection />
 
         {/* Section 4: Deep Security Feature Cards Matrix */}
         <FeaturesSection />
@@ -42,9 +41,6 @@ export default function App() {
 
         {/* Section 6: Standard Filter Capability Comparison */}
         <ComparisonTable />
-
-        {/* Section 7: Middleware Flow Architecture Topology */}
-        <ArchitectureDiagram />
 
         {/* Section 8: Severity Incident Timelines & Interactive Case Studies */}
         <BreachCards />
