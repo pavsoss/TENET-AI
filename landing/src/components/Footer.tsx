@@ -61,6 +61,7 @@ export default function Footer() {
             </a>
             <a href="https://github.com/TENET-DEV-AI/TENET-AI/blob/main/CONTRIBUTING.md" target="_blank" rel="noreferrer" className="footer-link">Contributing</a>
             <a href="https://github.com/TENET-DEV-AI/TENET-AI/blob/main/SECURITY.md" target="_blank" rel="noreferrer" className="footer-link">Security</a>
+            <a href="#" className="footer-link" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
             <a href="mailto:saviodsouza8a@gmail.com" className="footer-link">Contact</a>
           </div>
 
