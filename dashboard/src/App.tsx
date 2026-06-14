@@ -125,8 +125,10 @@ export default function App() {
   const [health, setHealth] = useState({ ingest: false, analyzer: false });
   const [filters, setFilters] = useState<FilterState>(filtersFromURL);
   const [presets, setPresets] = useState<Preset[]>(() => {
-    try { return JSON.parse(localStorage.getItem(PRESETS_KEY) || '[]'); }
-    catch { return []; }
+    try {
+      const parsed = JSON.parse(localStorage.getItem(PRESETS_KEY) || '[]');
+      return Array.isArray(parsed) ? parsed : [];
+    } catch { return []; }
   });
   const [presetName, setPresetName] = useState('');
   const [showPresetInput, setShowPresetInput] = useState(false);
@@ -150,7 +152,7 @@ export default function App() {
     if (!presetName.trim()) return;
     const next = [...presets, { name: presetName.trim(), filters }];
     setPresets(next);
-    localStorage.setItem(PRESETS_KEY, JSON.stringify(next));
+    try { localStorage.setItem(PRESETS_KEY, JSON.stringify(next)); } catch {}
     setPresetName('');
     setShowPresetInput(false);
   }, [presetName, presets, filters]);
@@ -163,7 +165,7 @@ export default function App() {
   const deletePreset = useCallback((index: number) => {
     const next = presets.filter((_, i) => i !== index);
     setPresets(next);
-    localStorage.setItem(PRESETS_KEY, JSON.stringify(next));
+    try { localStorage.setItem(PRESETS_KEY, JSON.stringify(next)); } catch {}
   }, [presets]);
 
   useEffect(() => {
@@ -369,7 +371,7 @@ const parseLocalDayEnd = (date: string) => {
                 onChange={e => updateFilter('search', e.target.value)}
                 aria-label="Search events"
               />
-              <button className="filter-toggle-btn" onClick={() => setShowFilters(p => !p)} aria-label="Toggle filters">
+              <button className="filter-toggle-btn" onClick={() => setShowFilters(p => !p)} aria-label={showFilters ? 'Hide filters' : 'Show filters'}>
                 <Filter size={16} />
                 {hasActiveFilters(filters) && <span className="filter-dot" />}
               </button>
@@ -420,7 +422,7 @@ const parseLocalDayEnd = (date: string) => {
                   {presets.map((p, i) => (
                     <div key={i} className="preset-chip">
                       <button onClick={() => applyPreset(p)}>{p.name}</button>
-                      <button className="preset-delete" onClick={() => deletePreset(i)}><X size={12} /></button>
+                      <button className="preset-delete" aria-label="Delete preset" onClick={() => deletePreset(i)}><X size={12} /></button>
                     </div>
                   ))}
                   {showPresetInput ? (
@@ -433,8 +435,8 @@ const parseLocalDayEnd = (date: string) => {
                         onKeyDown={e => e.key === 'Enter' && savePreset()}
                         autoFocus
                       />
-                      <button onClick={savePreset}><CheckCircle size={14} /></button>
-                      <button onClick={() => setShowPresetInput(false)}><X size={14} /></button>
+                        <button aria-label="Confirm preset name" onClick={savePreset}><CheckCircle size={14} /></button>
+                        <button aria-label="Cancel" onClick={() => setShowPresetInput(false)}><X size={14} /></button>
                     </div>
                   ) : (
                     <button className="save-preset-btn" onClick={() => setShowPresetInput(true)}>
