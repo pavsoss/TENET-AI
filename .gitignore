@@ -207,5 +207,3 @@ __marimo__/
 # Node.js / Frontend
 node_modules/
 dist/
-package-lock.json
-

@@ -42,13 +42,13 @@ export default function App() {
         {/* Section 6: Standard Filter Capability Comparison */}
         <ComparisonTable />
 
-        {/* Section 8: Severity Incident Timelines & Interactive Case Studies */}
+        {/* Section 7: Severity Incident Timelines & Interactive Case Studies */}
         <BreachCards />
 
-        {/* Section 9: Installation Configurations */}
+        {/* Section 8: Installation Configurations */}
         <InstallSection />
 
-        {/* Section 10: Call-To-Action (CTAs) */}
+        {/* Section 9: Call-To-Action (CTAs) */}
         <CtaSection />
       </main>
 

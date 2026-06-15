@@ -246,7 +246,22 @@ export default function DemoSection() {
 
             <div className="demo-panel-body" style={{ display: 'flex', flexDirection: 'column' }}>
               {/* User Prompt Box */}
-              <div className="demo-prompt-label" style={{ color: '#94A3B8' }}>Inbound User Prompt</div>
+              <div className="demo-prompt-label" style={{ color: '#94A3B8', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Inbound User Prompt</span>
+                <button 
+                  onClick={(e) => handleCopy(e, activeAttack)}
+                  style={{
+                    background: 'none', border: 'none', color: copiedId === activeAttack.id ? '#22C55E' : '#64748B', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px', padding: 0
+                  }}
+                  title="Copy Prompt"
+                >
+                  {copiedId === activeAttack.id ? (
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied</>
+                  ) : (
+                    <><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy</>
+                  )}
+                </button>
+              </div>
               <div className="demo-prompt-text" style={{ background: '#0B1120', borderColor: '#1E293B', color: '#F8FAFC', marginBottom: '8px' }}>
                 {displayedPrompt}
                 {status === 'typing' && <span className="hero-cursor">|</span>}

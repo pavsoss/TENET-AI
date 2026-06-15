@@ -1,26 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React from 'react';
 
 export default function UnifiedArchitectureSection() {
-  const [inView, setInView] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setInView(true);
-        observer.disconnect();
-      }
-    }, { threshold: 0.1 });
-
-    if (ref.current) {
-      observer.observe(ref.current);
-    }
-    return () => observer.disconnect();
-  }, []);
-
   return (
     <section className="section section-alt" id="pipeline" aria-label="System Architecture and Pipeline">
-      <div className="container" ref={ref}>
+      <div className="container">
         <div style={{ marginBottom: 48 }}>
           <div className="eyebrow" style={{ color: 'var(--purple)' }}>System Topology</div>
           <h2 className="section-title" style={{ color: '#0F172A' }}>Decentralized, high-performance <span style={{ color: '#A855F7' }}>middleware topology</span></h2>
