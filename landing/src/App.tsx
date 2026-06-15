@@ -23,7 +23,7 @@ export default function App() {
       <Navbar />
 
       {/* Main Content Sections */}
-      <main id="main-content" className="main">
+      <main id="main-content" className="main" tabIndex={-1}>
         {/* Section 1: Hero Area + Real-Time Security Log Terminal */}
         <Hero />
 
